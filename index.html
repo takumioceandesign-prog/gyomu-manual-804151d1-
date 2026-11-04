@@ -50,6 +50,9 @@ a { color: var(--accent); }
 .search { flex: 1 1 260px; display: flex; gap: 8px; align-items: center; min-width: 0; }
 .search input { flex: 1; min-width: 0; font: inherit; font-size: 14px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
 .search input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bych { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; }
+.bych a { text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 1px 9px; color: var(--accent); background: var(--accent-weak); }
+.bych .also { color: var(--muted); }
 .hits { font-size: 12px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .wrap { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 32px;
   padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
@@ -118,6 +121,8 @@ main { min-width: 0; }
 .lb img { max-width: 100%; max-height: calc(100% - 60px); object-fit: contain; background: #fff; border-radius: 4px; }
 .lb p { color: #eef2f7; margin: 0; font-size: 14px; text-align: center; }
 .lb button { position: absolute; top: max(12px, env(safe-area-inset-top, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); font: inherit; background: #fff; color: #172030; border: 0; border-radius: 999px; padding: 4px 14px; cursor: pointer; }
+body.searching .intro { display: none; }
+@media (max-width: 860px) { body.searching .rail { display: none; } }
 mark { background: var(--t-kk-bg); color: inherit; padding: 0 1px; border-radius: 2px; }
 .empty { color: var(--muted); padding: 24px 0; }
 @media (max-width: 860px) {
@@ -136,7 +141,8 @@ mark { background: var(--t-kk-bg); color: inherit; padding: 0 1px; border-radius
 
 <div class="topbar"><div class="topbar-in">
   <div class="brand">低与信 業務マニュアル<small>組み立て版・11/3時点</small></div>
-  <div class="search"><input id="q" type="search" placeholder="キーワードで探す（例：プレミア、eKYC、展開図）" aria-label="マニュアル内を検索"><span class="hits" id="hits"></span></div>
+  <div class="search"><input id="q" type="search" placeholder="言葉で探す（例：本人確認、エン停、車庫、プレミア 金額）" aria-label="マニュアル内を検索"><span class="hits" id="hits"></span></div>
+  <div class="bych" id="bych" hidden></div>
 </div></div>
 
 <div class="wrap">
@@ -205,29 +211,123 @@ mark { background: var(--t-kk-bg); color: inherit; padding: 0 1px; border-radius
     b.setAttribute('aria-expanded', 'true');
   });
 
-  var q = document.getElementById('q'), hits = document.getElementById('hits'), empty = document.getElementById('empty');
+  var SYN = [
+    ['eKYC','本人確認','顔認証','KYC'],
+    ['口座登録','口座振替','引き落とし','引落','講座登録','振替'],
+    ['TCS','MCCS','エンジン停止装置','エンジン制御装置','エンジン停止','エンジンストップ','エン停','GPS','止まる','遠隔'],
+    ['プレミア','モビリティ','モビ','モビ売','モビリティアンサーホールディングス','P-Gate','カープレミア'],
+    ['USS','CIS','USS-SS'],
+    ['リローン','スリークロス','リース見積'],
+    ['ICT','ノレル','ガリバー','AI与信'],
+    ['九州レンタリースサービス','九州レンタ','レンタ売','レンタ','KRS'],
+    ['ネクスト売','ネクストマッチ','ネクスト'],
+    ['ネクステージ','ネクステージストック','業販','業販サイト'],
+    ['オークション','AA','オークネット','アイオーク','ワンプライス','ワンプラ','セリ','落札','JUナビ'],
+    ['出品票','出品表','評価点','展開図','検査員報告','AIS','評価書'],
+    ['修復歴','R点','RA点','事故歴','冠水'],
+    ['キャンセル','クーリングオフ','キャンセル料','解約','中途解約'],
+    ['故障保証','保証','プロガード','カープレミア保証','ワランティ','P-Warranty'],
+    ['名義変更','名変','移転','所有権','名義'],
+    ['車庫証明','車庫','保管場所','配置図','自認書','保管場所使用承諾証明書'],
+    ['否決','否認','お見送り','落ちた','通らない','断られた','サービス提供不可','NG'],
+    ['可決','通った','承認','見積作成可能','シフト可決','単独可決','条件付き可決','120以上可決','120未満可決'],
+    ['仮審査','本審査','自動審査','審査中','審査申込'],
+    ['保証人','連帯保証人','保証人待ち'],
+    ['信用回復','CIC','信用情報','ブラック','繋ぎ'],
+    ['自己破産','債務整理','任意整理','個人再生','延滞','滞納','金融事故','遅れ'],
+    ['頭金','申込金','前金'],
+    ['月額','月々','分割','支払回数','回数','金利','実質年率','ボーナス'],
+    ['粗利','利益','あらり','原価','ローンバック','金利バック','仕切','販売手数料'],
+    ['注文書','契約書','見積書','請求書','見積'],
+    ['電子署名','電子サイン','クラウドサイン','GMO','GMOサイン','マネーフォワード','署名','サイン'],
+    ['シンフォニー','ヴェルティス','Tomo','注文書作成'],
+    ['kintone','キントーン','案件管理','ダッシュボード'],
+    ['Lステップ','エルステップ','LINE','ライン','公式LINE','グループLINE','友だち詳細'],
+    ['Chatwork','チャットワーク','チャット'],
+    ['架電','電話','通電','TEL','折り返し','不通','不在'],
+    ['SMS','ショートメール','ショートメッセージ'],
+    ['名乗り','自己紹介','源氏名','担当','エリア担当','地域担当'],
+    ['トーク','切り返し','文例','定型文','例文','言い方','キラートーク'],
+    ['失注','断り文句','考えたい','他社','よそ','家族に反対','家族からもらった','奥様','決裁者'],
+    ['即決','あなたから買う','クロージング','二者択一'],
+    ['納車','納期','陸送','引き渡し','来店納車','納車チーム'],
+    ['入庫','入庫チェック','納車前チェック','チェックシート','納車チェック','試乗'],
+    ['整備','整備工場','修理','三陽モータース','マルシン','城陽モータース','作業指示書','指示書'],
+    ['鈑金','板金','傷','キズ','へこみ','凹み','タッチアップ','飛び石','小傷'],
+    ['タイヤ','スタッドレス','冬タイヤ','夏タイヤ'],
+    ['雨漏れ','水漏れ','浸水'],
+    ['エーミング','センサー','先進安全装置','自動ブレーキ'],
+    ['登録','車検証','ナンバー','行政書士','封印','車検','記録事項','リサイクル券'],
+    ['必要書類','書類','住民票','印鑑証明','印鑑証明書','免許証','健康保険証','マイナンバー'],
+    ['収入証明','給与明細','確定申告','源泉徴収票','年収'],
+    ['入金','着金','立替','立替精算','精算','振込'],
+    ['クレーム','苦情','故障','不具合','トラブル','警告灯','異音'],
+    ['重複','重複チェック','審査歴','180日'],
+    ['外国籍','在留カード','永住権'],
+    ['年金','生活保護','障害年金'],
+    ['仮車両','中央値','推奨車両'],
+    ['相場','カーセンサー','業販価格','POS'],
+    ['燃費','実燃費','ガソリン','ガソリン代'],
+    ['自動車税','自賠責','重量税','税金','リサイクル料金'],
+    ['引継ぎ','引き継ぎ','引継書','引継ぎ書','可決報告','割り振り'],
+    ['成約','成約報告','売れた','契約'],
+    ['CPA','運用管理費','広告費','広告'],
+    ['KPI','目標','通電率','成約率','情報取得率'],
+    ['禁止','やってはいけない','NG行動','守ること'],
+    ['ID','パスワード','パス','ログイン','アカウント']
+  ];
+  function norm(s) {
+    s = (s || '').normalize('NFKC').toLowerCase();
+    return s.replace(/[ァ-ヶ]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0x60); });
+  }
+  var GROUPS = SYN.map(function (g) { return g.map(norm); });
+  function expand(term) {
+    var t = norm(term), out = [t], disp = [];
+    GROUPS.forEach(function (g, gi) {
+      var hit = g.some(function (w) { return w === t || (t.length >= 2 && (w.indexOf(t) > -1 || t.indexOf(w) > -1) && w.length >= 2); });
+      if (hit) SYN[gi].forEach(function (w) { if (out.indexOf(norm(w)) < 0) { out.push(norm(w)); disp.push(w); } });
+    });
+    out.disp = disp;
+    return out;
+  }
+  var q = document.getElementById('q'), hits = document.getElementById('hits'), empty = document.getElementById('empty'), bych = document.getElementById('bych');
   var items = Array.prototype.slice.call(document.querySelectorAll('#doc .it'));
-  items.forEach(function (li) { li._raw = li.querySelector('.tx').innerHTML; li._text = li.textContent.toLowerCase(); });
+  items.forEach(function (li) { li._raw = li.querySelector('.tx').innerHTML; li._text = norm(li.querySelector('.tx').textContent + ' ' + li.querySelector('.num').textContent); });
   var timer;
   function esc(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  function hiraToKata(s) { return s.replace(/[ぁ-ゖ]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) + 0x60); }); }
   function run() {
-    var v = q.value.trim().toLowerCase();
+    var v = q.value.trim();
     var secs = document.querySelectorAll('#doc .sec'), chaps = document.querySelectorAll('#doc .chap');
     if (!v) {
       items.forEach(function (li) { li.hidden = false; li.querySelector('.tx').innerHTML = li._raw; });
       secs.forEach(function (s) { s.hidden = false; }); chaps.forEach(function (c) { c.hidden = false; });
-      hits.textContent = ''; empty.hidden = true; return;
+      hits.textContent = ''; empty.hidden = true; bych.hidden = true; bych.innerHTML = ''; document.body.classList.remove('searching'); return;
     }
-    var n = 0, re = new RegExp('(' + esc(v) + ')', 'gi');
+    document.body.classList.add('searching');
+    var terms = v.split(/[\s　]+/).filter(Boolean).map(expand);
+    var words = [];
+    terms.forEach(function (ws) { ws.forEach(function (w) { [w, hiraToKata(w)].forEach(function (x) { if (x && words.indexOf(x) < 0) words.push(x); }); }); });
+    words.sort(function (a, b) { return b.length - a.length; });
+    var re = new RegExp('(' + words.map(esc).join('|') + ')', 'gi');
+    var n = 0;
     items.forEach(function (li) {
-      var ok = li._text.indexOf(v) > -1; li.hidden = !ok;
+      var ok = terms.every(function (ws) { return ws.some(function (w) { return li._text.indexOf(w) > -1; }); });
+      li.hidden = !ok;
       var tx = li.querySelector('.tx');
       if (ok) { n++; tx.innerHTML = li._raw.replace(/(^|>)([^<]+)(?=<|$)/g, function (m, a, b) { return a + b.replace(re, '<mark>$1</mark>'); }); }
       else tx.innerHTML = li._raw;
     });
     secs.forEach(function (s) { s.hidden = !s.querySelector('.it:not([hidden])'); });
-    chaps.forEach(function (c) { c.hidden = !c.querySelector('.sec:not([hidden])'); });
+    var chips = [];
+    chaps.forEach(function (c) {
+      var k = c.querySelectorAll('.it:not([hidden])').length; c.hidden = k === 0;
+      if (k) chips.push('<a href="#' + c.id + '">' + c.querySelector('.eyebrow').textContent + ' ' + k + '件</a>');
+    });
+    var extra = terms.map(function (ws) { return ws.disp; }).filter(function (x) { return x.length; });
     hits.textContent = n + '件';
+    bych.innerHTML = chips.join('') + (extra.length ? '<span class="also">言い換えも検索：' + extra.map(function (x) { return x.slice(0, 6).join('・'); }).join(' ／ ') + '</span>' : '');
+    bych.hidden = n === 0;
     empty.hidden = n > 0;
   }
   q.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(run, 150); });
