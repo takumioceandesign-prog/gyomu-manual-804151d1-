@@ -11,3 +11,13 @@
     });
   }
 }
+{
+  for (const b of document.querySelectorAll('.copy')) {
+    b.addEventListener('click', async () => {
+      const t = b.closest('.script').querySelector('.st').innerText;
+      try { await navigator.clipboard.writeText(t); b.textContent = 'コピーしました'; }
+      catch (e) { b.textContent = 'コピーできません'; }
+      setTimeout(() => { b.textContent = 'コピー'; }, 1600);
+    });
+  }
+}
