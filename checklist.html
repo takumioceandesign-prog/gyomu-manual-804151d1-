@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>目次兼チェックリスト</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/*
+VOICE: 研修の現場で使う、落ち着いた事務書式。業務マニュアル本体と同じ青系。
+IDEA: 教育担当がクリップボードに挟んで持ち歩く研修チェックシート。
+PICTURE: 章ごとの帯と、3段階のチェック欄が並ぶ表そのもの。
+COLOUR and TYPE: 白地・紺の文字・マニュアルと同じ青 #1d5ea8、時期だけ3色。Zen Kaku Gothic New + Noto Sans JP。
+LAYOUT: 上に記入欄、下に章ごとの表。スマホでは1単元を1枚のカードに。印刷はA4縦。
+*/
+:root{color-scheme:light dark;
+ --bg:light-dark(#f4f6f9,#0f131a);--surface:light-dark(#fff,#161c26);--ink:light-dark(#172030,#e5eaf1);
+ --muted:light-dark(#5b6678,#9ba7b9);--line:light-dark(#dce2ea,#283244);--accent:light-dark(#1d5ea8,#82b2ef);
+ --aw:light-dark(#e5edf8,#1a2840);
+ --p1b:light-dark(#fde5e5,#3d1a1a);--p1f:light-dark(#a32323,#f2a3a3);
+ --p2b:light-dark(#fdf0dc,#3a2a12);--p2f:light-dark(#8a4d00,#f3c27a);
+ --p3b:light-dark(#e9f4ee,#16302a);--p3f:light-dark(#1f6b45,#8fd3ae)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;overflow-x:clip}
+a{color:var(--accent)}
+.wrap{max-width:1080px;margin:0 auto;padding:clamp(20px,4vw,48px) max(4vw,14px)}
+h1{word-break:keep-all;font:900 clamp(28px,4.4vw,40px)/1.1 "Zen Kaku Gothic New",sans-serif;margin:0 0 6px;text-wrap:balance}
+.lead{color:var(--muted);margin:0 0 18px;max-width:62ch}
+.sample{display:inline-block;font-size:13px;color:var(--p2f);background:var(--p2b);border-radius:6px;padding:2px 8px;margin-bottom:14px}
+.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 16px}
+.fields div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-height:56px}
+.fields span{display:block;font-size:13px;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--muted);margin:0 0 18px}
+.legend b{color:var(--ink);font-weight:500}
+table{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+thead th{font-size:13px;font-weight:500;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--surface)}
+thead th.c{text-align:center}
+tr.ch th{background:var(--aw);text-align:left;padding:10px 12px;border-top:1px solid var(--line)}
+.chap:first-of-type tr.ch th{border-top:0}
+.chh{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cn{font:900 20px/1 "Zen Kaku Gothic New",sans-serif;color:var(--accent);white-space:nowrap}
+.ct{font:700 17px/1.3 "Zen Kaku Gothic New",sans-serif;flex:1}
+.open{font-size:13px;font-weight:500;white-space:nowrap;padding:10px 4px;min-height:44px;display:inline-flex;align-items:center}
+.qr{display:none}
+td{padding:9px 10px;border-top:1px solid var(--line);vertical-align:middle}
+td.no{font-weight:700;color:var(--muted);white-space:nowrap;width:4.2em}
+td.unit a{font-weight:700;text-decoration:none;color:var(--ink)}
+td.unit a:hover{color:var(--accent);text-decoration:underline}
+td.unit small{display:block;font-size:13px;color:var(--muted);line-height:1.45;margin-top:2px}
+td.pri{width:5.4em}
+.tag{display:inline-block;font-size:13px;font-weight:700;border-radius:5px;padding:1px 7px;white-space:nowrap}
+.p1{background:var(--p1b);color:var(--p1f)}.p2{background:var(--p2b);color:var(--p2f)}.p3{background:var(--p3b);color:var(--p3f)}
+td.ck{width:6.6em;text-align:center;cursor:pointer;user-select:none}
+.box{display:inline-block;width:20px;height:20px;border:1.5px solid var(--muted);border-radius:4px;vertical-align:middle;position:relative}
+td.ck.on .box{background:var(--accent);border-color:var(--accent)}
+td.ck.on .box::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid var(--surface);border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+.dt{display:block;font-size:13px;color:var(--muted);letter-spacing:.3em;margin-top:2px}
+td.by{width:5.6em}
+.sign{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px}
+.sign div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-height:72px}
+.sign span{font-size:13px;color:var(--muted)}
+.toplink{margin:0 0 10px;font-size:14px}.note{font-size:13px;color:var(--muted);margin-top:14px}
+@media(max-width:700px){
+ .fields{grid-template-columns:1fr}
+ thead{display:none}
+ table,tbody,tr{display:block}
+ tr.ch th{display:block}
+ tbody tr:not(.ch){display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:10px;padding:10px 12px;border-top:1px solid var(--line)}
+ tbody tr:not(.ch) td{border:0;padding:0;width:auto}
+ td.no{grid-row:1;grid-column:1}
+ td.unit{grid-row:1;grid-column:2}
+ td.pri{grid-row:1;grid-column:3}
+ td.ck{grid-row:2;margin-top:10px;display:flex;align-items:center;gap:6px;min-height:44px;font-size:13px;text-align:left}
+ td.ck::after{content:attr(data-l);color:var(--muted)}
+ td.ck .dt{display:none}
+ td.ck:nth-child(4){grid-column:1/2}
+ td.ck:nth-child(5){grid-column:2/3}
+ td.ck:nth-child(6){grid-column:3/4}
+ td.by{display:none}
+ .sign{grid-template-columns:1fr}
+}
+@media print{
+ @page{size:A4 portrait;margin:11mm 10mm}
+ :root{color-scheme:light}
+ body{background:#fff;font-size:10.5pt}
+ .wrap{padding:0;max-width:none}
+ h1{font-size:19pt}.lead,.legend{font-size:9pt;margin-bottom:8px}
+ .sample,.open,.toplink{display:none}
+ .fields div{min-height:40px;padding:4px 8px}
+ table{border-radius:0;font-size:9.5pt}
+ .chap{break-inside:avoid}
+ tr{break-inside:avoid}
+ td{padding:4px 6px}td.unit small{font-size:8pt}
+ .qr{display:block;width:44px;height:44px;margin-left:auto}
+ .qr img,.qr canvas{width:44px!important;height:44px!important}
+ thead{display:table-header-group}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="sample">サンプル：「時期」と各単元の「ゴール」は仮置きです。教育担当者の意見で直します</span>
+<p class="toplink"><a href="index.html">マニュアル全文（検索つき）はこちら</a></p>
+<h1>業務マニュアル<wbr> 目次兼<wbr>チェックリスト</h1>
+<p class="lead">マニュアル全11章を41の単元にまとめた目次です。教育担当者は、単元ごとに3段階で進み具合をチェックします。単元名を押すと、写真付きの説明ページが開きます。</p>
+
+<div class="fields">
+ <div><span>新人の名前</span></div>
+ <div><span>教育担当者</span></div>
+ <div><span>研修開始日</span></div>
+</div>
+
+<div class="legend">
+ <span><b>教えた</b>：説明した</span>
+ <span><b>一緒にやった</b>：見せた・横で一緒にやった</span>
+ <span><b>一人でできた</b>：見ていて一人でできた</span>
+ <span><span class="tag p1">初日</span> <span class="tag p2">1週目</span> <span class="tag p3">1か月</span>：教える時期の目安</span>
+</div>
+
+<table>
+<thead><tr><th>No</th><th>単元（含む内容）</th><th>時期</th><th class="c">教えた</th><th class="c">一緒にやった</th><th class="c">一人でできた</th><th>確認者</th></tr></thead>
+<tbody class="chap"><tr class="ch"><th colspan="7"><div class="chh"><span class="cn">1章</span><span class="ct">問い合わせ（送客）</span><span class="qr" id="qr1" aria-hidden="true"></span></div></th></tr>
+<tr><td class="no" data-l="No">1</td><td class="unit" data-l="単元"><a href="u/1.html">媒体の種類と特徴</a><small>モビローン／MIC 新車・中古車リース否決／クルマ王／カーエール</small></td><td class="pri" data-l="時期"><span class="tag p1">初日</span></td><td class="ck" data-l="教えた" data-k="a" data-u="1"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="1"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="1"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">2</td><td class="unit" data-l="単元"><a href="u/2.html">KPIと目標</a><small>全媒体の目標数値と見方</small></td><td class="pri" data-l="時期"><span class="tag p1">初日</span></td><td class="ck" data-l="教えた" data-k="a" data-u="2"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="2"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="2"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">3</td><td class="unit" data-l="単元"><a href="u/3.html">禁止事項・守ること</a><small>全媒体共通のルール</small></td><td class="pri" data-l="時期"><span class="tag p1">初日</span></td><td class="ck" data-l="教えた" data-k="a" data-u="3"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="3"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="3"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+</tbody>
+<tbody class="chap"><tr class="ch"><th colspan="7"><div class="chh"><span class="cn">2章</span><span class="ct">初期対応〜情報取得</span><span class="qr" id="qr2" aria-hidden="true"></span></div></th></tr>
+<tr><td class="no" data-l="No">4</td><td class="unit" data-l="単元"><a href="u/4.html">アポインターの目的と共通ルール</a><small>初回連絡の目的、守るルール</small></td><td class="pri" data-l="時期"><span class="tag p1">初日</span></td><td class="ck" data-l="教えた" data-k="a" data-u="4"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="4"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="4"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">5</td><td class="unit" data-l="単元"><a href="u/5.html">ツールとkintone入力</a><small>使うツール、kintoneの入力ルール</small></td><td class="pri" data-l="時期"><span class="tag p1">初日</span></td><td class="ck" data-l="教えた" data-k="a" data-u="5"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="5"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="5"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">6</td><td class="unit" data-l="単元"><a href="u/6.html">媒体別の受付</a><small>モビローン／MIC／クルマ王／カーエール（Lステップ）</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="6"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="6"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="6"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+</tbody>
+<tbody class="chap"><tr class="ch"><th colspan="7"><div class="chh"><span class="cn">3章</span><span class="ct">審査〜可決</span><span class="qr" id="qr3" aria-hidden="true"></span></div></th></tr>
+<tr><td class="no" data-l="No">7</td><td class="unit" data-l="単元"><a href="u/7.html">審査の考え方と信販会社の選び方</a><small>審査の順番、信販会社の選び方</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="7"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="7"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="7"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">8</td><td class="unit" data-l="単元"><a href="u/8.html">仮車両と車両条件</a><small>仮車両の選び方、信販会社ごとの車両条件</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="8"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="8"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="8"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">9</td><td class="unit" data-l="単元"><a href="u/9.html">審査のかけ方と金額設定</a><small>各社の審査のかけ方、金額設定、ICTの詳細</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="9"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="9"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="9"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">10</td><td class="unit" data-l="単元"><a href="u/10.html">回答時間・可決の報告と引継ぎ</a><small>回答までの時間、可決の定義・報告、運用上の注意</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="10"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="10"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="10"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+</tbody>
+<tbody class="chap"><tr class="ch"><th colspan="7"><div class="chh"><span class="cn">4章</span><span class="ct">商談</span><span class="qr" id="qr4" aria-hidden="true"></span></div></th></tr>
+<tr><td class="no" data-l="No">11</td><td class="unit" data-l="単元"><a href="u/11.html">商談の考え方</a><small>範囲と目的、失注を信用しない</small></td><td class="pri" data-l="時期"><span class="tag p1">初日</span></td><td class="ck" data-l="教えた" data-k="a" data-u="11"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="11"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="11"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">12</td><td class="unit" data-l="単元"><a href="u/12.html">お伝えすることチェックリスト</a><small>商談で漏れなく伝える内容</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="12"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="12"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="12"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">13</td><td class="unit" data-l="単元"><a href="u/13.html">初動・準備・初回商談</a><small>初動、商談準備、初回商談の進め方</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="13"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="13"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="13"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">14</td><td class="unit" data-l="単元"><a href="u/14.html">車選び</a><small>車種決めのトーク、提案の仕方</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="14"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="14"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="14"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">15</td><td class="unit" data-l="単元"><a href="u/15.html">金額と粗利</a><small>金額の出し方、粗利の考え方</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="15"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="15"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="15"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">16</td><td class="unit" data-l="単元"><a href="u/16.html">信用回復ストーリーと切り返し</a><small>信用回復の伝え方、反対への切り返しトーク</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="16"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="16"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="16"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">17</td><td class="unit" data-l="単元"><a href="u/17.html">クロージング〜契約説明</a><small>クロージング・本審査、契約とお客様への説明</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="17"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="17"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="17"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">18</td><td class="unit" data-l="単元"><a href="u/18.html">クローザーのレベル</a><small>レベルの目安</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="18"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="18"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="18"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+</tbody>
+<tbody class="chap"><tr class="ch"><th colspan="7"><div class="chh"><span class="cn">5章</span><span class="ct">仕入れ</span><span class="qr" id="qr5" aria-hidden="true"></span></div></th></tr>
+<tr><td class="no" data-l="No">19</td><td class="unit" data-l="単元"><a href="u/19.html">仕入れ先と仕入れの基準</a><small>範囲と目的、仕入れ先の一覧、基準</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="19"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="19"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="19"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">20</td><td class="unit" data-l="単元"><a href="u/20.html">ネクステージ業販とオークション</a><small>業販の使い方、AAでの落札</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="20"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="20"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="20"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">21</td><td class="unit" data-l="単元"><a href="u/21.html">仕入れ後の手続きとクレーム申請</a><small>手続き、仕入れ先へのクレーム申請</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="21"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="21"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="21"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+</tbody>
+<tbody class="chap"><tr class="ch"><th colspan="7"><div class="chh"><span class="cn">6章</span><span class="ct">成約後（車両の実務・判断）</span><span class="qr" id="qr6" aria-hidden="true"></span></div></th></tr>
+<tr><td class="no" data-l="No">22</td><td class="unit" data-l="単元"><a href="u/22.html">成約処理と納車チームへの引継ぎ</a><small>6-1 全体の段取り、11/3会議で決まったこと、成約処理の流れ</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="22"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="22"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="22"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">23</td><td class="unit" data-l="単元"><a href="u/23.html">判断の基本ルール</a><small>6-2 目的と前提、基本ルール</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="23"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="23"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="23"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">24</td><td class="unit" data-l="単元"><a href="u/24.html">部位別の判断</a><small>タイヤ／鈑金・タッチアップ／ガラス／センサー／雨漏れ／その他</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="24"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="24"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="24"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">25</td><td class="unit" data-l="単元"><a href="u/25.html">エーミングと整備工場との進め方</a><small>エーミングの基礎知識、整備工場との進め方</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="25"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="25"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="25"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+</tbody>
+<tbody class="chap"><tr class="ch"><th colspan="7"><div class="chh"><span class="cn">7章</span><span class="ct">契約（お客様に関わるもの）</span><span class="qr" id="qr7" aria-hidden="true"></span></div></th></tr>
+<tr><td class="no" data-l="No">26</td><td class="unit" data-l="単元"><a href="u/26.html">書類課への引継ぎと必要書類</a><small>確認の進め方、営業からの引継ぎ、必要書類の準備・発送</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="26"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="26"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="26"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">27</td><td class="unit" data-l="単元"><a href="u/27.html">書類回収と原本確認</a><small>お客様対応・書類回収、到着・原本確認</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="27"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="27"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="27"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">28</td><td class="unit" data-l="単元"><a href="u/28.html">契約進捗管理と登録・車庫証明</a><small>信販会社の進捗管理、登録・車庫証明、社内共有の書類</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="28"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="28"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="28"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">29</td><td class="unit" data-l="単元"><a href="u/29.html">よくあるトラブルと共通ルール</a><small>トラブル事例、共通ルール</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="29"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="29"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="29"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+</tbody>
+<tbody class="chap"><tr class="ch"><th colspan="7"><div class="chh"><span class="cn">8章</span><span class="ct">会社としての処理</span><span class="qr" id="qr8" aria-hidden="true"></span></div></th></tr>
+<tr><td class="no" data-l="No">30</td><td class="unit" data-l="単元"><a href="u/30.html">マネーチャートの全体像</a><small>確認の進め方、成約から納車後までの流れ</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="30"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="30"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="30"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">31</td><td class="unit" data-l="単元"><a href="u/31.html">成約時の作業（フェーズ1）</a><small>成約時の初期作業</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="31"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="31"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="31"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">32</td><td class="unit" data-l="単元"><a href="u/32.html">納車後・立替精算後の作業（フェーズ2・3）</a><small>納車後の作業、立替精算完了後の作業</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="32"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="32"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="32"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">33</td><td class="unit" data-l="単元"><a href="u/33.html">売り方の決め方</a><small>売り方の判断</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="33"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="33"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="33"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+</tbody>
+<tbody class="chap"><tr class="ch"><th colspan="7"><div class="chh"><span class="cn">9章</span><span class="ct">納車</span><span class="qr" id="qr9" aria-hidden="true"></span></div></th></tr>
+<tr><td class="no" data-l="No">34</td><td class="unit" data-l="単元"><a href="u/34.html">入庫〜仕上げ</a><small>入庫チェック、整備、鈑金、仕上げ</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="34"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="34"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="34"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">35</td><td class="unit" data-l="単元"><a href="u/35.html">登録</a><small>抹消・新規・継続・名変</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="35"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="35"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="35"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">36</td><td class="unit" data-l="単元"><a href="u/36.html">納車チェックと陸送</a><small>納車チェック、陸送（来店納車）</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="36"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="36"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="36"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+</tbody>
+<tbody class="chap"><tr class="ch"><th colspan="7"><div class="chh"><span class="cn">10章</span><span class="ct">入金</span><span class="qr" id="qr10" aria-hidden="true"></span></div></th></tr>
+<tr><td class="no" data-l="No">37</td><td class="unit" data-l="単元"><a href="u/37.html">入金の流れ</a><small>入金確認の骨子（作成中）</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="37"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="37"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="37"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+</tbody>
+<tbody class="chap"><tr class="ch"><th colspan="7"><div class="chh"><span class="cn">11章</span><span class="ct">納車後のクレーム対応</span><span class="qr" id="qr11" aria-hidden="true"></span></div></th></tr>
+<tr><td class="no" data-l="No">38</td><td class="unit" data-l="単元"><a href="u/38.html">基本ルール</a><small>範囲と目的、基本ルール</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="38"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="38"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="38"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">39</td><td class="unit" data-l="単元"><a href="u/39.html">連絡を受けたときの対応</a><small>チャート①連絡を受けたとき／②切り分け／③報連相</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="39"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="39"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="39"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">40</td><td class="unit" data-l="単元"><a href="u/40.html">想定されるクレーム・故障</a><small>ケース別の対応チャート</small></td><td class="pri" data-l="時期"><span class="tag p3">1か月</span></td><td class="ck" data-l="教えた" data-k="a" data-u="40"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="40"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="40"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+<tr><td class="no" data-l="No">41</td><td class="unit" data-l="単元"><a href="u/41.html">折り返しの電話を誰がするか</a><small>担当の決め方</small></td><td class="pri" data-l="時期"><span class="tag p2">1週目</span></td><td class="ck" data-l="教えた" data-k="a" data-u="41"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一緒にやった" data-k="b" data-u="41"><span class="box"></span><span class="dt">／</span></td><td class="ck" data-l="一人でできた" data-k="c" data-u="41"><span class="box"></span><span class="dt">／</span></td><td class="by" data-l="確認者"></td></tr>
+</tbody>
+</table>
+
+<div class="sign">
+ <div><span>全単元の修了：新人のサイン・日付</span></div>
+ <div><span>全単元の修了：教育担当者のサイン・日付</span></div>
+</div>
+<p class="note">画面ではチェック欄を押すと印が付きます（この端末のブラウザにだけ保存され、単元ページのチェックと連動します）。記録を残すときは、ブラウザの印刷機能でA4に印刷して手書きで使ってください。印刷すると各章に、その章の説明ページを開くQRコードが付きます。</p>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+{
+ const qrs=[["1", "https://takumioceandesign-prog.github.io/gyomu-manual-804151d1-/u/1.html"], ["2", "https://takumioceandesign-prog.github.io/gyomu-manual-804151d1-/u/4.html"], ["3", "https://takumioceandesign-prog.github.io/gyomu-manual-804151d1-/u/7.html"], ["4", "https://takumioceandesign-prog.github.io/gyomu-manual-804151d1-/u/11.html"], ["5", "https://takumioceandesign-prog.github.io/gyomu-manual-804151d1-/u/19.html"], ["6", "https://takumioceandesign-prog.github.io/gyomu-manual-804151d1-/u/22.html"], ["7", "https://takumioceandesign-prog.github.io/gyomu-manual-804151d1-/u/26.html"], ["8", "https://takumioceandesign-prog.github.io/gyomu-manual-804151d1-/u/30.html"], ["9", "https://takumioceandesign-prog.github.io/gyomu-manual-804151d1-/u/34.html"], ["10", "https://takumioceandesign-prog.github.io/gyomu-manual-804151d1-/u/37.html"], ["11", "https://takumioceandesign-prog.github.io/gyomu-manual-804151d1-/u/38.html"]];
+ try{ if(window.QRCode){ for(const [id,url] of qrs){ const el=document.getElementById('qr'+id); if(el) new QRCode(el,{text:url,width:88,height:88,correctLevel:QRCode.CorrectLevel.M}); } } }catch(e){}
+ const K=(c)=>'chk:'+c.dataset.u+':'+c.dataset.k;
+ for(const c of document.querySelectorAll('td.ck')){try{if(localStorage.getItem(K(c))) c.classList.add('on');}catch(e){}}
+ document.addEventListener('click',ev=>{const c=ev.target.closest('td.ck'); if(!c) return; const on=c.classList.toggle('on'); try{on?localStorage.setItem(K(c),'1'):localStorage.removeItem(K(c));}catch(e){}});
+}
+</script>
+</body>
+</html>
